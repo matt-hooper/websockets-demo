@@ -6,8 +6,8 @@ window.onload = function() {
   var messagesList = document.getElementById('messages');
   var socketStatus = document.getElementById('status');
   var closeBtn = document.getElementById('close');
-
-
+  var submitBtn = document.getElementById('submit');
+  
   // Create a new WebSocket.
   var socket = new WebSocket('ws://echo.websocket.org');
 
@@ -39,27 +39,45 @@ window.onload = function() {
     socketStatus.className = 'closed';
   };
 
+  function sendMessage ()
+  {
+    if (socket.readyState == socket.OPEN)
+    {
+      
+      // Retrieve the message from the textarea.
+      var message = messageField.value;
+
+      // Send the message through the WebSocket.
+      socket.send(message);
+
+      // Add the message to the messages list.
+      messagesList.innerHTML += '<li class="sent"><span>Sent:</span>' + message +
+                                '</li>';
+
+      // Clear out the message field.
+      messageField.value = '';
+    }
+    else
+    {
+      alert ('Websocket connection is closed.');
+    }
+
+    return false;
+  }
 
   // Send a message when the form is submitted.
   form.onsubmit = function(e) {
     e.preventDefault();
 
-    // Retrieve the message from the textarea.
-    var message = messageField.value;
-
-    // Send the message through the WebSocket.
-    socket.send(message);
-
-    // Add the message to the messages list.
-    messagesList.innerHTML += '<li class="sent"><span>Sent:</span>' + message +
-                              '</li>';
-
-    // Clear out the message field.
-    messageField.value = '';
-
-    return false;
+    return sendMessage();
   };
 
+  messageField.addEventListener("keydown", function(event) {
+    if (event.keyCode == 13 && event.ctrlKey)
+      return sendMessage();
+
+    return false;  
+  });
 
   // Close the WebSocket connection when the close button is clicked.
   closeBtn.onclick = function(e) {
